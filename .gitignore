@@ -1,9 +1,10 @@
-# Ignore
+__pycache__
 *.pyc
 *.json
-config.py
+config.env
 log.txt
 venv
 
 # Exception 
 !.vscode/settings.json
+!.vscode/launch.json

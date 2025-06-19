@@ -1,81 +1,50 @@
 import os
-import json
-import logging
-from telegram import Bot
-from bot.alive import alive
-from config import CONFIG_VARIABLE
+import shutil
+from time import time
+from telegram import Bot, __version__ as __ptbversion__
+from .utils.config import CONFIG
+from .utils.logger import setup_logging
 
-open('log.txt', 'w')
+# constants
+__version__ = "1.1.0.16" # major.minor.patch.commits
+CONFIG_FILE = "config.env"
+REQUIRED_DIRS = ["sys"]
+ORIGINAL_BOT_USERNAME = "EvaTheLovebot"
+ORIGINAL_BOT_ID = 7945092854
+DEFAULT_ERROR_CHANNEL_ID = -1002675104487
+BOT_UPTIME = time()
+RUN_SERVER = True # switch to run flask server
 
-#Enable logging
-logging.basicConfig(
-    filename="log.txt", format="%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(filename)s - %(message)s", level=logging.INFO
-)
-#set higher logging level for httpx to avoid all GET and POST requests being logged
-logging.getLogger("httpx").setLevel(logging.WARNING)
-# Disable Werkzeug logging
-logging.getLogger('werkzeug').setLevel(logging.ERROR)  # Use logging.CRITICAL to remove it completely
-
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(filename)s - %(message)s")
-console.setFormatter(formatter)
-logging.getLogger("").addHandler(console)
-
-logger = logging.getLogger(__name__)
-
-# Config
-bot_token = CONFIG_VARIABLE.BOT_TOKEN
-owner_id = int(CONFIG_VARIABLE.OWNER_ID)
-owner_username = CONFIG_VARIABLE.OWNER_USERNAME
-server_url = CONFIG_VARIABLE.SERVER_URL
-#database
-mongodb_uri = CONFIG_VARIABLE.MONGODB_URI
-db_name = CONFIG_VARIABLE.DB_NAME
-
-if not bot_token:
-    logger.error("BOT_TOKEN not provided!")
-    exit(1)
-
-# Local Database
-LOCAL_DB = "database.json"
-
-check_local_db = os.path.isfile(LOCAL_DB)
-if not check_local_db:
-    logger.info("localdb not found...")
-    json.dump({}, open(LOCAL_DB, "w"))
-    logger.info("localdb created...")
-
+# Creating Required Folder/Directories
 try:
-    json.dump(
-        {"bot_docs": {}, "_bot_info": {}, "users": {}, "data_center": {}},
-        open(LOCAL_DB, "w"),
-        indent=4
-    )
-    logger.info("localdb updated...")
+    for dir_name in REQUIRED_DIRS:
+        if os.path.exists(dir_name):
+            shutil.rmtree(dir_name)
+        os.makedirs(dir_name, exist_ok=True)
 except Exception as e:
-    logger.error(e)
+    print(e)
+    exit()
+
+# logger & .env config file
+logger = setup_logging() # need to execute after creating Required folders
+config = CONFIG()
+config.load_config(CONFIG_FILE)
+
+if not config.validate():
+    raise ValueError("Missing required configuration.")
 
 # Main bot function
-bot = Bot(bot_token)
+bot = Bot(config.bot_token)
 
-logger.info(
-'''
+logger.info(f"""
 Developed by
-
- ▄▄▄▄    ██▓  ██████  ██░ ██  ▄▄▄       ██▓    
-▓█████▄ ▓██▒▒██    ▒ ▓██░ ██▒▒████▄    ▓██▒    
-▒██▒ ▄██▒██▒░ ▓██▄   ▒██▀▀██░▒██  ▀█▄  ▒██░    
-▒██░█▀  ░██░  ▒   ██▒░▓█ ░██ ░██▄▄▄▄██ ▒██░    
-░▓█  ▀█▓░██░▒██████▒▒░▓█▒░██▓ ▓█   ▓██▒░██████▒
-░▒▓███▀▒░▓  ▒ ▒▓▒ ▒ ░ ▒ ░░▒░▒ ▒▒   ▓▒█░░ ▒░▓  ░
-▒░▒   ░  ▒ ░░ ░▒  ░ ░ ▒ ░▒░ ░  ▒   ▒▒ ░░ ░ ▒  ░
- ░    ░  ▒ ░░  ░  ░   ░  ░░ ░  ░   ▒     ░ ░   
- ░       ░        ░   ░  ░  ░      ░  ░    ░  ░
-      ░                                        
-                            Library python-telegram-bot
-'''
-)
-
-# Server breathing
-alive()
+ ______     __     ______     __  __     ______     __        
+/\  == \   /\ \   /\  ___\   /\ \_\ \   /\  __ \   /\ \       
+\ \  __<   \ \ \  \ \___  \  \ \  __ \  \ \  __ \  \ \ \____  
+ \ \_____\  \ \_\  \/\_____\  \ \_\ \_\  \ \_\ \_\  \ \_____\ 
+  \/_____/   \/_/   \/_____/   \/_/\/_/   \/_/\/_/   \/_____/ 
+   
+    Version: {__version__}
+    Library: python-telegram-bot {__ptbversion__}
+    GitHub: https://github.com/bishalqx980
+""")
