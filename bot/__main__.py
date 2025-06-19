@@ -6,17 +6,13 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
-    InlineQueryHandler,
     filters,
-    CallbackQueryHandler,
     ChatMemberHandler,
-    ContextTypes,
     Defaults
 )
-from telegram.error import BadRequest
-from telegram.constants import ChatID, ParseMode
+from telegram.constants import ParseMode
 
-from . import DEFAULT_ERROR_CHANNEL_ID, RUN_SERVER, bot, logger, config
+from . import RUN_SERVER, bot, logger, config
 from .utils.alive import alive
 from .utils.update_db import update_database
 from .utils.database import MemoryDB
@@ -24,6 +20,15 @@ from .utils.database import MemoryDB
 from .handlers import (
     func_start,
     func_help,
+
+    func_broadcast,
+    func_database,
+    func_log,
+    func_say,
+    func_send,
+    func_server,
+    func_shell,
+    func_sys,
 
     func_id,
     func_info,
@@ -94,16 +99,15 @@ def main():
         # core func
         CommandHandler("start", func_start),
         CommandHandler("help", func_help),
-        # group management func
-        # CommandHandler("server", func_server),
         # owner func
-        # CommandHandler("broadcast", func_broadcast),
-        # CommandHandler("database", func_database),
-        # CommandHandler("log", func_log),
-        # CommandHandler("say", func_say),
-        # CommandHandler("send", func_send),
-        # CommandHandler("shell", func_shell),
-        # CommandHandler("sys", func_sys),
+        CommandHandler("broadcast", func_broadcast),
+        CommandHandler("database", func_database),
+        CommandHandler("log", func_log),
+        CommandHandler("say", func_say),
+        CommandHandler("send", func_send),
+        CommandHandler("server", func_server),
+        CommandHandler("shell", func_shell),
+        CommandHandler("sys", func_sys),
         # user func
         CommandHandler("id", func_id),
         CommandHandler("info", func_info)
@@ -115,23 +119,6 @@ def main():
     application.add_handler(ChatMemberHandler(bot_chats_tracker, ChatMemberHandler.MY_CHAT_MEMBER))
     # filterALL : Core for this bot
     application.add_handler(MessageHandler(filters.ALL, func_filterAll))
-
-    
-
-    # # Inline Query Handler
-    # application.add_handler(InlineQueryHandler(inline_query.inline_query_handler))
-
-    # # Callback query handlers
-    # application.add_handlers([
-    #     CallbackQueryHandler(query_help_menu.query_help_menu, "help_menu_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_bot_settings.query_bot_settings, "bsettings_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_chat_settings.query_chat_settings, "csettings_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_admin_task.query_groupManagement, "admin_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_misc.query_misc, "misc_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_broadcast.query_broadcast, "broadcast_[A-Za-z0-9]+"),
-    #     CallbackQueryHandler(query_db_editing.query_db_editing, "database_[A-Za-z0-9]+")
-    # ])
-
     # Check Updates
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
