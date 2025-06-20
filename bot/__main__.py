@@ -1,9 +1,11 @@
 import asyncio
 import aiohttp
+import traceback
 
 from telegram import Update, LinkPreviewOptions, BotCommand
 from telegram.ext import (
     ApplicationBuilder,
+    ContextTypes,
     CommandHandler,
     MessageHandler,
     filters,
@@ -11,8 +13,9 @@ from telegram.ext import (
     Defaults
 )
 from telegram.constants import ParseMode
+from telegram.error import BadRequest
 
-from . import RUN_SERVER, bot, logger, config
+from . import DEFAULT_ERROR_CHANNEL_ID, RUN_SERVER, bot, logger, config
 from .utils.alive import alive
 from .utils.update_db import update_database
 from .utils.database import MemoryDB
@@ -82,6 +85,40 @@ async def server_alive():
         except Exception as e:
             logger.error(f"{server_url} > {e}")
         await asyncio.sleep(180) # 3 min
+
+
+async def default_error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.error(context.error)
+
+    error_text = "".join(traceback.format_exception(type(context.error), context.error, context.error.__traceback__))
+    # Remove excessive path details for readability
+    error_text = "\n".join(line for line in error_text.split("\n") if "site-packages" not in line)
+    # telegram message limit ?
+    error_text = error_text[-2000:]
+
+    text = (
+        "<blockquote>An error occured</blockquote>\n\n"
+
+        f"<b>• Type:</b> <code>{type(context.error).__name__}</code>\n"
+        f"<b>• Message:</b> <code>{str(context.error)}</code>\n"
+        "<b>• Traceback:</b>\n\n"
+        f"<pre>{error_text}</pre>"
+    )
+    
+    if DEFAULT_ERROR_CHANNEL_ID:
+        try:
+            await context.bot.send_message(DEFAULT_ERROR_CHANNEL_ID, text)
+            return
+        except BadRequest:
+            pass
+        except Exception as e:
+            logger.error(e)
+            return
+    # if not DEFAULT_ERROR_CHANNEL_ID or BadRequest
+    try:
+        await context.bot.send_message(config.owner_id, text)
+    except Exception as e:
+        logger.error(e)
 
 
 def main():

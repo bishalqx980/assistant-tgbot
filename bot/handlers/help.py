@@ -1,8 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes
-from bot.utils.decorators.error_hunter import error_hunter
 
-@error_hunter
 async def func_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
         "<blockquote>Command's list</blockquote>"

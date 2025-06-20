@@ -4,9 +4,7 @@ from telegram.constants import MessageOriginType
 from telegram.error import Forbidden
 from bot import config
 from bot.helpers import BuildKeyboard
-from bot.utils.decorators.error_hunter import error_hunter
 
-@error_hunter
 async def func_filterAll(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.message

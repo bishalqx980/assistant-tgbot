@@ -2,9 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import MessageOriginType
 from bot.helpers import BuildKeyboard
-from bot.utils.decorators.error_hunter import error_hunter
 
-@error_hunter
 async def func_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.message

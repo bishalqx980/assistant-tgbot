@@ -3,9 +3,7 @@ from telegram.ext import ContextTypes
 from bot import config
 from bot.helpers import BuildKeyboard
 from bot.utils.database import database_add_user
-from bot.utils.decorators.error_hunter import error_hunter
 
-@error_hunter
 async def func_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     owner_data = await context.bot.get_chat(config.owner_id)
 
@@ -23,4 +21,4 @@ async def func_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     btn = BuildKeyboard.ubutton(btn_data)
 
     await update.message.reply_text(text, reply_markup=btn)
-    await database_add_user(update.effective_user)
+    database_add_user(update.effective_user)

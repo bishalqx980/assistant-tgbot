@@ -1,9 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import MessageOriginType
-from bot.utils.decorators.error_hunter import error_hunter
 
-@error_hunter
 async def func_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
