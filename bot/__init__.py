@@ -6,7 +6,7 @@ from .utils.config import CONFIG
 from .utils.logger import setup_logging
 
 # constants
-__version__ = "1.2.0.17" # major.minor.patch.commits
+__version__ = "1.2.1.20" # major.minor.patch.commits
 CONFIG_FILE = "config.env"
 REQUIRED_DIRS = ["sys"]
 ORIGINAL_BOT_USERNAME = "EvaTheLovebot"
