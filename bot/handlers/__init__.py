@@ -15,5 +15,8 @@ from .owner_handlers.sys import func_sys
 from .user_handlers.id import func_id
 from .user_handlers.info import func_info
 
+# query handlers
+from .query_handlers.query_broadcast import query_broadcast
+
 # core function
 from .core.assistant import func_filterAll

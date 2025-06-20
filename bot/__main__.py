@@ -8,6 +8,7 @@ from telegram.ext import (
     ContextTypes,
     CommandHandler,
     MessageHandler,
+    CallbackQueryHandler,
     filters,
     ChatMemberHandler,
     Defaults
@@ -35,6 +36,8 @@ from .handlers import (
 
     func_id,
     func_info,
+
+    query_broadcast,
 
     func_filterAll
 )
@@ -156,6 +159,10 @@ def main():
     application.add_handler(ChatMemberHandler(bot_chats_tracker, ChatMemberHandler.MY_CHAT_MEMBER))
     # filterALL : Core for this bot
     application.add_handler(MessageHandler(filters.ALL, func_filterAll))
+    # Callback query handlers
+    application.add_handlers([CallbackQueryHandler(query_broadcast, "broadcast_[A-Za-z0-9]+")])
+    # Error handler
+    application.add_error_handler(default_error_handler)
     # Check Updates
     application.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
 
